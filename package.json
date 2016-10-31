@@ -1,0 +1,30 @@
+{
+  "name": "udder",
+  "version": "0.2.0",
+  "description": "Sample utterance generator for Amazon Echo apps",
+  "main": "lib/udder.js",
+  "bin": "./src/cli.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Raynes/udder.git"
+  },
+  "contributors": [
+    "Anthony Grimes",
+    "Erik Price"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Raynes/udder/issues"
+  },
+  "homepage": "https://github.com/Raynes/udder",
+  "dependencies": {
+    "moment": "^2.15.2",
+    "node-uuid": "^1.4.7",
+    "pg-promise": "^5.3.5",
+    "restify": "^4.2.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "mocha --harmony --harmony_destructuring"
+  }
+}
