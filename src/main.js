@@ -113,9 +113,9 @@ async function getProject(req, res, next) {
 
   if (uid) {
     let project = await db.oneOrNone(
-      "SELECT * FROM projects WHERE user_id = ${uid} AND project_id = ${pid}", {
+      "SELECT * FROM projects WHERE user_id = ${uid} AND project_name = ${pname}", {
         uid: uid,
-        pid: req.params.project
+        pname: req.params.project
       }
     );
 
@@ -175,6 +175,32 @@ async function createProject(req, res, next) {
   return next();
 }
 
+async function deleteProject(req, res, next) {
+  let uid = await getUid(req.params.username);
+
+  if (uid) {
+    let project = await db.oneOrNone(
+      "SELECT project_id FROM projects WHERE project_name = ${pname} AND user_id = ${uid}", {
+        pname: req.params.project,
+        uid: uid
+      }
+    );
+
+    if (project) {
+      await db.query("DELETE FROM projects WHERE project_id = ${pid}", {
+        pid: project.project_id
+      });
+      res.send(204);
+    } else {
+      res.send(404, new Error("Project not found."));
+    }
+  } else {
+    res.send(404, new Error("User not found."));
+  }
+
+  return next();
+}
+
 server.get('/users/:username', getUser);
 server.post('/users/create/:username', createUser);
 server.del('/users/:username', deleteUser);
@@ -182,5 +208,6 @@ server.del('/users/:username', deleteUser);
 server.get('/projects/:username', getProjects);
 server.get('/projects/:username/:project', getProject);
 server.post('/projects/:username/create', createProject);
+server.del('/projects/:username/:project', deleteProject);
 
 server.listen(conf['port']);
