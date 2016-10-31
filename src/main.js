@@ -11,6 +11,7 @@ const db = pgp(conf['dbUrl']);
 const server = restify.createServer({
   name: 'MyApp'
 });
+server.use(restify.bodyParser());
 
 async function createUser(req, res, next) {
   try {
