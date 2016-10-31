@@ -1,30 +1,26 @@
 {
-  "name": "udder",
-  "version": "0.2.0",
-  "description": "Sample utterance generator for Amazon Echo apps",
-  "main": "lib/udder.js",
-  "bin": "./src/cli.js",
+  "name": "intime",
+  "version": "0.1.0",
+  "description": "Time tracking API",
+  "main": "./src/main.js",
+  "bin": "./src/main.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Raynes/udder.git"
+    "url": "https://github.com/Raynes/intime.git"
   },
   "contributors": [
-    "Anthony Grimes",
-    "Erik Price"
+    "Anthony Grimes"
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Raynes/udder/issues"
+    "url": "https://github.com/Raynes/intime/issues"
   },
-  "homepage": "https://github.com/Raynes/udder",
+  "homepage": "https://github.com/Raynes/intime",
   "dependencies": {
     "moment": "^2.15.2",
     "node-uuid": "^1.4.7",
     "pg-promise": "^5.3.5",
     "restify": "^4.2.0"
   },
-  "devDependencies": {},
-  "scripts": {
-    "test": "mocha --harmony --harmony_destructuring"
-  }
+  "devDependencies": {}
 }
