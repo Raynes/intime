@@ -83,15 +83,24 @@ async function getUid(username) {
   return null;
 }
 
+function projectToJson(project) {
+  return {
+      projectName: project.project_name,
+      projectId: project.project_id,
+      projectDescription: project.project_description
+    }
+}
+
 async function getProjects(req, res, next) {
   let uid = await getUid(req.params.username);
 
   if (uid) {
-    let projects = await db.query("SELECT * FROM projects WHERE user_id = ${user_id}", {
+    let projects = await db.query(
+      "SELECT * FROM projects WHERE user_id = ${user_id}", {
       user_id: uid
     });
 
-    res.send(projects);
+    res.send(projects.map(projectToJson));
   } else {
     res.send(404, new Error("User not found."));
   }
@@ -111,7 +120,7 @@ async function getProject(req, res, next) {
     );
 
     if (project) {
-      res.send(project);
+      res.send(projectToJson(project));
     } else {
       res.send(404, new Error("Project not found."));
     }
@@ -123,15 +132,48 @@ async function getProject(req, res, next) {
 }
 
 async function createProject(req, res, next) {
-  let uid = await getUid(req.params.uid);
+  req.accepts('application/json');
 
-  if (uid) {
-    try {
-      //
-    }
+  let uid = await getUid(req.params.username);
+
+  if (!uid) {
+    res.send(404, new Error("User not found."));
+    return next();
   }
-}
 
+  let pid = uuid.v4();
+
+  if (req.body === undefined || req.body.name.length === 0) {
+    res.send(400, new Error(
+      "A JSON body with at least 'name' is required."
+      )
+    );
+
+    return next();
+  }
+
+  try {
+    await db.query(
+      "INSERT INTO projects VALUES (${uid}, ${pid}, ${name}, ${desc})", {
+        uid: uid,
+        pid: pid,
+        name: req.body.name,
+        desc: req.body.description
+      });
+
+      res.send(201, {
+        projectId: pid,
+        projectName: req.body.name,
+        projectDescription: req.body.description
+      });
+    } catch (e) {
+      if (e.code ===  '23505') {
+        res.send(400, new Error("This project already exists."));
+      }
+  }
+
+  return next();
+}
 
 server.get('/users/:username', getUser);
 server.post('/users/create/:username', createUser);
@@ -139,6 +181,6 @@ server.del('/users/:username', deleteUser);
 
 server.get('/projects/:username', getProjects);
 server.get('/projects/:username/:project', getProject);
-//server.post('/projects/:username/:projectname', createProject);
+server.post('/projects/:username/create', createProject);
 
 server.listen(conf['port']);
