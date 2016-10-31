@@ -10,7 +10,8 @@ CREATE TABLE IF NOT EXISTS projects (
   user_id             VARCHAR(36) REFERENCES users,
   project_id          VARCHAR(36) PRIMARY KEY,
   project_name        VARCHAR(256) NOT NULL,
-  project_description TEXT
+  project_description TEXT DEFAULT NULL,
+  UNIQUE (project_name, user_id)
 );
 
 DROP TABLE IF EXISTS session_start CASCADE;
@@ -19,7 +20,7 @@ CREATE TABLE IF NOT EXISTS session_start (
   session_id VARCHAR(36) PRIMARY KEY,
   project_id VARCHAR(36) REFERENCES projects,
   start_time TIMESTAMP NOT NULL,
-  session_description TEXT
+  session_description TEXT DEFAULT NULL
 );
 
 DROP TABLE IF EXISTS session_end CASCADE;
