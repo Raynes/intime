@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS session_start (
   user_id    VARCHAR(36) REFERENCES users,
   session_id VARCHAR(36) PRIMARY KEY,
   project_id VARCHAR(36) REFERENCES projects,
-  start_time TIMESTAMP NOT NULL,
+  start_time TIMESTAMP WITH TIME ZONE NOT NULL,
   session_description TEXT DEFAULT NULL
 );
 
@@ -28,5 +28,5 @@ CREATE TABLE IF NOT EXISTS session_end (
   user_id       VARCHAR(36) REFERENCES users,
   session_id    VARCHAR(36) REFERENCES session_start,
   project_id    VARCHAR(36) REFERENCES projects,
-  end_time      TIMESTAMP NOT NULL
+  end_time      TIMESTAMP WITH TIME ZONE NOT NULL
 );
