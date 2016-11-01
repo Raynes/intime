@@ -83,6 +83,21 @@ async function getUid(username) {
   return null;
 }
 
+async function getPid(uid, project) {
+  let proj = await db.oneOrNone(
+    "SELECT project_id FROM projects WHERE project_name = ${pname} AND user_id = ${uid}", {
+      pname: project,
+      uid: uid
+    }
+  );
+
+  if (proj) {
+    return proj.project_id;
+  } else {
+    return null;
+  }
+}
+
 function projectToJson(project) {
   return {
       projectName: project.project_name,
@@ -179,16 +194,11 @@ async function deleteProject(req, res, next) {
   let uid = await getUid(req.params.username);
 
   if (uid) {
-    let project = await db.oneOrNone(
-      "SELECT project_id FROM projects WHERE project_name = ${pname} AND user_id = ${uid}", {
-        pname: req.params.project,
-        uid: uid
-      }
-    );
+    let pid = await getPid(uid, req.params.project);
 
-    if (project) {
+    if (pid) {
       await db.query("DELETE FROM projects WHERE project_id = ${pid}", {
-        pid: project.project_id
+        pid: pid
       });
       res.send(204);
     } else {
@@ -201,13 +211,85 @@ async function deleteProject(req, res, next) {
   return next();
 }
 
+async function startSession(req, res, next) {
+  let uid = await getUid(req.params.username);
+
+  if (uid) {
+    let pid = await getPid(uid, req.params.project)
+
+    if (req.body && req.body.description) {
+      var desc = req.body.description;
+    } else {
+      var desc = null;
+    }
+
+    if (pid) {
+      let sid = uuid.v4();
+      await db.query(
+        "INSERT INTO session_start VALUES (${uid}, ${sid}, ${pid}, 'now', ${desc})", {
+          uid: uid,
+          sid: sid,
+          pid: pid.project_id,
+          desc: desc
+        }
+      );
+
+      res.send(200, {sessionId: sid});
+    } else {
+      res.send(404, new Error("Project not found."));
+    }
+  } else {
+    res.send(404, new Error("User not found."));
+  }
+
+  return next();
+}
+
+async function endSession(req, res, next) {
+  let session = await db.oneOrNone(
+    "SELECT * FROM session_start WHERE session_id = ${sid}", {
+      sid: req.params.session
+    }
+  );
+
+  if (session) {
+    let sid = session.session_id;
+    await db.query(
+      "INSERT INTO session_end VALUES (${uid}, ${sid}, ${pid}, 'now')", {
+        uid: session.user_id,
+        sid: sid,
+        pid: session.project_id
+      }
+    );
+
+    res.send(204);
+  } else {
+    res.send(404, new Error("Session not found."));
+  }
+
+  return next();
+}
+
+async function getSessions(req, res, next) {
+  // TODO
+}
+
+async function sessionStatus(req, res, next) {
+  // TODO
+}
+
 server.get('/users/:username', getUser);
-server.post('/users/create/:username', createUser);
+server.post('/users/:username', createUser);
 server.del('/users/:username', deleteUser);
 
 server.get('/projects/:username', getProjects);
 server.get('/projects/:username/:project', getProject);
-server.post('/projects/:username/create', createProject);
+server.post('/projects/:username/:project', createProject);
 server.del('/projects/:username/:project', deleteProject);
+
+server.post('/sessions/start/:username/:project', startSession);
+server.post('/sessions/end/:session', endSession);
+server.get('/sessions/:username/:project', getSessions);
+server.get('/sessions/:session', sessionStatus);
 
 server.listen(conf['port']);
