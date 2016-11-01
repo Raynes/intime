@@ -262,12 +262,7 @@ async function endSession(req, res, next) {
   return next();
 }
 
-async function getSessions(req, res, next) {
-  // TODO
-}
-
-async function sessionStatus(req, res, next) {
-  let sid = req.params.session;
+async function getSessionStatus(sid) {
   let statusQuery = `
 SELECT
   s.session_id AS sid,
@@ -286,7 +281,7 @@ WHERE s.session_id = $<sid>`;
   });
 
   if (data) {
-    res.send({
+    return {
       userId: data.uid,
       sessionId: data.sid,
       projectId: data.pid,
@@ -296,9 +291,28 @@ WHERE s.session_id = $<sid>`;
       hours: data.hours,
       total: data.total,
       active: data.endtime ? true : false
-    });
+    };
   } else {
-    res.send(404, new Error("Start session not found."))
+    return null;
+  }
+}
+
+async function getSession(req, res, next) {
+  // TODO
+}
+
+async function getSessions(req, res, next) {
+  // TODO
+}
+
+async function sessionStatus(req, res, next) {
+  let sid = req.params.session;
+  let status = await getSessionStatus(sid);
+
+  if (status) {
+    res.send(status);
+  } else {
+    res.send(404, "Start session not found.");
   }
 
   return next();
