@@ -290,7 +290,7 @@ WHERE s.session_id = $<sid>`;
       description: data.desc,
       hours: data.hours,
       total: data.total,
-      active: data.endtime ? true : false
+      active: !data.endtime ? true : false
     };
   } else {
     return null;
