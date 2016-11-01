@@ -226,7 +226,7 @@ async function startSession(req, res, next) {
     if (pid) {
       let sid = uuid.v4();
       await db.query(
-        "INSERT INTO session_start VALUES (${uid}, ${sid}, ${pid}, 'now', ${desc})", {
+        "INSERT INTO session_start VALUES (${uid}, ${sid}, ${pid}, 'now'::timestamp, ${desc})", {
           uid: uid,
           sid: sid,
           pid: pid.project_id,
@@ -275,7 +275,41 @@ async function getSessions(req, res, next) {
 }
 
 async function sessionStatus(req, res, next) {
-  // TODO
+  let sid = req.params.session;
+  let statusQuery = `
+SELECT
+  s.session_id AS sid,
+  s.user_id AS uid,
+  s.project_id AS pid,
+  s.start_time AS starttime,
+  s.session_description AS desc,
+  e.end_time AS endtime,
+  ceil(extract(EPOCH FROM (coalesce(end_time, 'now') - start_time)) / 3600) AS hours,
+  'now'::TIMESTAMP WITHOUT TIME ZONE - start_time AS total
+FROM session_start AS s LEFT OUTER JOIN session_end AS e ON s.session_id = e.session_id
+WHERE s.session_id = $<sid>`;
+
+  let data = await db.oneOrNone(statusQuery, {
+    sid: sid
+  });
+
+  if (data) {
+    res.send({
+      userId: data.uid,
+      sessionId: data.sid,
+      projectId: data.pid,
+      endTime: data.endtime,
+      startTime: data.starttime,
+      description: data.desc,
+      hours: data.hours,
+      total: data.total,
+      active: data.endtime ? true : false
+    });
+  } else {
+    res.send(404, new Error("Start session not found."))
+  }
+
+  return next();
 }
 
 server.get('/users/:username', getUser);
