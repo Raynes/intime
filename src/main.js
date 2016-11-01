@@ -297,10 +297,6 @@ WHERE s.session_id = $<sid>`;
   }
 }
 
-async function getSession(req, res, next) {
-  // TODO
-}
-
 async function getSessions(req, res, next) {
   // TODO
 }
