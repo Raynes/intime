@@ -28,5 +28,6 @@ CREATE TABLE IF NOT EXISTS session_end (
   user_id       VARCHAR(36) REFERENCES users,
   session_id    VARCHAR(36) REFERENCES session_start,
   project_id    VARCHAR(36) REFERENCES projects,
-  end_time      TIMESTAMP WITH TIME ZONE NOT NULL
+  end_time      TIMESTAMP WITH TIME ZONE NOT NULL,
+  UNIQUE (session_id)
 );
