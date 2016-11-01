@@ -157,29 +157,21 @@ async function createProject(req, res, next) {
   }
 
   let pid = uuid.v4();
-
-  if (req.body === undefined || req.body.name.length === 0) {
-    res.send(400, new Error(
-      "A JSON body with at least 'name' is required."
-      )
-    );
-
-    return next();
-  }
+  let desc = req.body ? req.body.description : null;
 
   try {
     await db.query(
       "INSERT INTO projects VALUES (${uid}, ${pid}, ${name}, ${desc})", {
         uid: uid,
         pid: pid,
-        name: req.body.name,
-        desc: req.body.description
+        name: req.params.project,
+        desc: desc
       });
 
       res.send(201, {
         projectId: pid,
-        projectName: req.body.name,
-        projectDescription: req.body.description
+        projectName: req.params.project,
+        projectDescription: desc
       });
     } catch (e) {
       if (e.code ===  '23505') {
