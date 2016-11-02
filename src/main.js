@@ -298,7 +298,14 @@ WHERE s.session_id = $<sid>`;
 }
 
 async function getSessions(req, res, next) {
-  // TODO
+  // TODO Should be able to paginate and return statuses
+}
+
+async function sliceSession(req, res, next) {
+  // TODO This will be the primary way to query the API
+  // for "how many hours did I work between these days/this month"
+  // Should return the total interval of time, total hours,
+  // the date range, and totals grouped by description as well.
 }
 
 async function sessionStatus(req, res, next) {
